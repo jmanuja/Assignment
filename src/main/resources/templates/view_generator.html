@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Generate Data</title>
+    <style>
+        h1 {
+            text-align: center;
+        }
+        .center {
+            margin: auto;
+            width: 50%;
+            border: 3px solid blue;
+            padding: 10px;
+            text-align: center;
+        }
+        .label {
+            float: left;
+            width: 25em;
+            text-align: right;
+            padding-right: 10px;
+        }
+        .bold{
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha512-DeNeekCILcrzL1FtTl+zjBD6z2nGucwdZJeZOXtoS9hfL3azWLzqfDgll61D6jO/EhM9gx4PokARMUfgrwiQfw=="
+            referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js"></script>
+    <script>
+        var isProcessing =false;
+
+        function process(){
+            var count = $("#count").val();
+
+            if(isProcessing == false && count > 0 ){
+                isProcessing = true;
+                startRestartInterval(); // every millisecond call updateDisplay
+                $.get('http://localhost:8080/generate',{ count: count },
+                function(data, status, xhr) {
+                    clearInterval(timer);
+                    alert(count + " Records Inserted Success");
+                    isProcessing =false;
+                })
+                .fail(function(xhr, status, ex) {
+                    isProcessing =false;
+                    clearInterval(timer);
+                    alert(xhr.responseText);
+                });
+            }else{
+                var error  = isProcessing == false ? "Please fill Record Count" : "Already Processing. please wait";
+                alert(error);
+            }
+        }
+
+        var timer;
+        var m, s, ms = 0;
+
+        function startRestartInterval() {
+            var startTime = Date.now();
+            timer = setInterval(function(){
+                var elapsedTime = Date.now() - startTime;
+                formatMs(elapsedTime);
+            }, 10);
+        }
+
+        function formatMs(elapsedTime) {
+            var date = new Date(elapsedTime); // round to nearest second
+
+            function pad(i) { return ('0'+i).slice(-2); }
+
+            m = pad(date.getUTCMinutes());
+            s = pad(date.getUTCSeconds());
+            ms= date.getMilliseconds();
+
+            $("#min").text( m);
+            $("#sec").text( s);
+            $("#milsec").text( ms);
+
+        }
+    </script>
+</head>
+<body>
+<div id="container">
+    <header>
+        <h1>Performance Tester</h1>
+    </header>
+    <div class="center" id="main">
+        <div>
+            <input id="count" name="count" type="text"><br><br>
+            <button id="btnSubmit" onclick="process()">Submit</button>
+        </div>
+        <div class="bold">
+            <p>
+                <span style="color:black">Timer   </span>
+                <span class="time_slot" id="min">00</span> :
+                <span class="time_slot" id="sec">00</span> :
+                <span class="time_slot" id="milsec">00</span>
+            </p>
+        </div>
+    </div>
+    <br>
+    <footer style="text-align: center"> <p> Assignment created by : Manuja Jaywardana</p></footer>
+</div>
+</body>
+</html>
